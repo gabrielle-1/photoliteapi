@@ -3,11 +3,10 @@ package io.github.gabrielle1.photoliteapi.application.photos;
 import io.github.gabrielle1.photoliteapi.domain.entity.Photo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -43,6 +42,24 @@ public class PhotoController {
         URI photoURI = buildPhotoURL(photoSaved);
 
         return ResponseEntity.created(photoURI).build();
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) {
+
+        var possiblePhoto = this.service.findById(id);
+        if (possiblePhoto.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var photo = possiblePhoto.get();
+        var headers = new HttpHeaders();
+        headers.setContentType(photo.getExtension().getMediaType());
+        headers.setContentLength(photo.getSize());
+        // inline; filename="image.PNG"
+        headers.setContentDispositionFormData("inline; filename=\"" + photo.getFileName() + "\"", photo.getFileName());
+
+        return new ResponseEntity<>(photo.getFile(), headers, HttpStatus.OK);
     }
 
     private URI buildPhotoURL(Photo photo) {
