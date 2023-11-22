@@ -25,4 +25,14 @@ public class PhotoMapper {
                 .build();
     }
 
+    public PhotoDTO photoToDTO(Photo photo, String url) {
+        return PhotoDTO.builder()
+                .url(url)
+                .name(photo.getName())
+                .extension(photo.getExtension().name())
+                .size(photo.getSize())
+                .uploadDate(photo.getUploadDate().toLocalDate())
+                .build();
+    }
+
 }
