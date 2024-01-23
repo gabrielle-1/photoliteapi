@@ -23,4 +23,11 @@ public enum PhotoExtension {
                 .findFirst()
                 .orElse(null);
     }
+
+    public static PhotoExtension getValueOfExtensionName(String extension) {
+        return Arrays.stream(values())
+                .filter(imageExtension -> imageExtension.name().equalsIgnoreCase(extension))
+                .findFirst()
+                .orElse(null);
+    }
 }

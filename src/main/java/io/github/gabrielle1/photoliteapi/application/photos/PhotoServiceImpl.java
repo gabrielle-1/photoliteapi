@@ -1,12 +1,14 @@
 package io.github.gabrielle1.photoliteapi.application.photos;
 
 import io.github.gabrielle1.photoliteapi.domain.entity.Photo;
+import io.github.gabrielle1.photoliteapi.domain.enums.PhotoExtension;
 import io.github.gabrielle1.photoliteapi.domain.service.PhotoService;
 import io.github.gabrielle1.photoliteapi.infra.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,5 +27,10 @@ public class PhotoServiceImpl implements PhotoService {
     @Override
     public Optional<Photo> findById(String id) {
         return this.photoRepository.findById(id);
+    }
+
+    @Override
+    public List<Photo> search(PhotoExtension extension, String query) {
+        return this.photoRepository.findByExtensionAndNameOrTagsLike(extension, query);
     }
 }

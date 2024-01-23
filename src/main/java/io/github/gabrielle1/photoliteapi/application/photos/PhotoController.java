@@ -1,6 +1,7 @@
 package io.github.gabrielle1.photoliteapi.application.photos;
 
 import io.github.gabrielle1.photoliteapi.domain.entity.Photo;
+import io.github.gabrielle1.photoliteapi.domain.enums.PhotoExtension;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -13,11 +14,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/photos")
 @Slf4j
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class PhotoController {
 
     private final PhotoServiceImpl service;
@@ -62,10 +65,27 @@ public class PhotoController {
         return new ResponseEntity<>(photo.getFile(), headers, HttpStatus.OK);
     }
 
+    @GetMapping
+    public ResponseEntity<List<PhotoDTO>> search(
+            @RequestParam(value="extension", required = false, defaultValue = "") String extension,
+            @RequestParam(value="query", required = false) String query) {
+
+        var result = service.search(PhotoExtension.getValueOfExtensionName(extension), query);
+
+        var photos = result.stream()
+                    .map(photo -> {
+                    var url = buildPhotoURL(photo);
+                    return mapper.photoToDTO(photo, url.toString());
+                }).collect(Collectors.toList());
+
+
+        return ResponseEntity.ok(photos);
+    }
+
     private URI buildPhotoURL(Photo photo) {
         String photoPath = "/" + photo.getId();
         return ServletUriComponentsBuilder
-                .fromCurrentRequest()
+                .fromCurrentRequestUri()
                 .path(photoPath)
                 .build().toUri();
     }
